@@ -2,27 +2,157 @@
   height: 100vh;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(to right, #f9d423, #ff4e50);
+  padding: 2rem;
+  z-index: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to right, #f9d423, #ff4e50);
 }
 
 .birthday-content {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 2rem 3rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-  max-width: 600px;
+  color: white;
+  font-size: 2rem;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
 }
 
-@media (max-width: 768px) {
-  .birthday-content {
-    padding: 1.5rem;
-    width: 90%;
+/* 左上角音乐控制区 */
+.music-controls {
+  position: absolute;
+  top: 20px;
+  left: 18px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: rgba(107, 58, 58, 0);
+  backdrop-filter: blur(5px);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.music-slider {
+  width: 120px;
+}
+
+.red-envelope-container {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.red-envelope-button {
+  background-color: #d7000f !important;
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(215, 0, 15, 0.4);
+}
+
+.red-envelope-button:hover {
+  background-color: #b6000d !important;
+}
+
+/* 红包弹窗 */
+.red-envelope-modal .semi-modal-content {
+  background-color: transparent;
+  box-shadow: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 红包容器 */
+.envelope-box {
+  width: 260px;
+  height: 360px;
+  background: linear-gradient(to bottom, #ff4e50, #d7000f);
+  border-radius: 16px;
+  position: relative;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: popIn 0.3s ease-out;
+}
+
+/* 开红包按钮样式 */
+.circle-button {
+  width: 80px;
+  height: 80px;
+  background: gold;
+  color: #b6000d;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  animation: pulse 1.2s infinite;
+}
+
+.tap-text {
+  color: #fff0f0;
+  margin-top: 12px;
+  font-size: 1rem;
+  animation: fadeIn 1s ease-in;
+}
+
+/* 已打开 */
+.envelope-opened .open-result {
+  font-size: 1.2rem;
+  color: white;
+  text-align: center;
+  animation: fadeIn 0.6s ease-in;
+}
+
+/* 动画关键帧 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 12px rgba(255, 215, 0, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
   }
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+

@@ -1,5 +1,6 @@
 import { Layout, Nav } from '@douyinfe/semi-ui'
-import { IconGift, IconHome } from '@douyinfe/semi-icons'
+import { IconSemiLogo, IconHome } from '@douyinfe/semi-icons';
+import { IconDescriptions, IconIntro, IconTree, IconAvatar, IconTreeSelect, IconTabs } from '@douyinfe/semi-icons-lab';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import Home from './pages/Home'
@@ -33,22 +34,29 @@ function App() {
     <Layout style={{ height: '100vh' }}>
       <Sider style={{ backgroundColor: '#fff' }}>
         <Nav
-          selectedKeys={[location.pathname]}
-          onSelect={({ itemKey }) => navigate(itemKey)}
+          bodyStyle={{ height: 320 }}
           items={[
-            { itemKey: '/home', text: '首页', icon: <IconHome /> },
-            //{ itemKey: '/birthday', text: '生日祝福', icon: <IconGift /> }
+            { itemKey: 'home', text: '首页', icon: <IconHome /> },
+            { itemKey: 'union', text: '竞价数据导出', icon: <IconDescriptions /> },
+              {
+                text: '任务平台',
+                icon: <IconTree />,
+                itemKey: 'job',
+                items: ['任务管理', '用户任务查询'],
+              },
           ]}
           header={{
-            logo: <img src="https://semi.design/logo.png" alt="logo" width={32} />,
-            text: '导航栏'
+            logo: <IconSemiLogo style={{ height: '36px', fontSize: 36 }} />,
+            text: 'Semi 运营后台'
           }}
+          footer={{
+            collapseButton: true,
+          }}
+          // onSelect={data => console.log('trigger onSelect: ', data)}
+          // onClick={data => console.log('trigger onClick: ', data)}
         />
       </Sider>
       <Layout>
-        <Header style={{ backgroundColor: 'white', paddingLeft: 24 }}>
-          <h3>🌟 我的前端练习项目</h3>
-        </Header>
         <Content style={{ padding: '24px', background: '#f8f8f8' }}>
           <Routes>
             <Route path="/home" element={<Home />} />
