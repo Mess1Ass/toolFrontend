@@ -5,6 +5,7 @@ import { useNavigate, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import Home from './pages/Home'
 import Birthday from './pages/Birthday/Birthday'
+import BidExport from './pages/BidResultExport/BidExport'
 
 const { Header, Sider, Content } = Layout
 
@@ -34,10 +35,10 @@ function App() {
     <Layout style={{ height: '100vh' }}>
       <Sider style={{ backgroundColor: '#fff' }}>
         <Nav
-          bodyStyle={{ height: 320 }}
+          bodyStyle={{ height: '80vh' }}
           items={[
             { itemKey: 'home', text: '首页', icon: <IconHome /> },
-            { itemKey: 'union', text: '竞价数据导出', icon: <IconDescriptions /> },
+            { itemKey: 'bidexport', text: '竞价数据导出', icon: <IconDescriptions /> },
               {
                 text: '任务平台',
                 icon: <IconTree />,
@@ -47,19 +48,22 @@ function App() {
           ]}
           header={{
             logo: <IconSemiLogo style={{ height: '36px', fontSize: 36 }} />,
-            text: 'Semi 运营后台'
+            text: 'SNH48 相关工具箱'
           }}
           footer={{
             collapseButton: true,
           }}
-          // onSelect={data => console.log('trigger onSelect: ', data)}
-          // onClick={data => console.log('trigger onClick: ', data)}
+          onSelect={({ itemKey }) => {
+            navigate(itemKey); // ✅ 加上路由跳转
+          }}
+          onClick={data => console.log('trigger onClick: ', data)}
         />
       </Sider>
       <Layout>
         <Content style={{ padding: '24px', background: '#f8f8f8' }}>
           <Routes>
             <Route path="/home" element={<Home />} />
+            <Route path="/bidexport" element={<BidExport />} />
             {/* <Route path="/birthday" element={<Birthday />} /> */}
           </Routes>
         </Content>
