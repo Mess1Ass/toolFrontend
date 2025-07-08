@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import Home from './pages/Home'
 import Birthday from './pages/Birthday/Birthday'
 import BidExport from './pages/BidResultExport/BidExport'
+import BidDetail from './pages/BidDetail/BidDetail'
 
 const { Header, Sider, Content } = Layout
 
@@ -38,7 +39,8 @@ function App() {
           bodyStyle={{ height: '80vh' }}
           items={[
             { itemKey: 'home', text: '首页', icon: <IconHome /> },
-            { itemKey: 'bidexport', text: '竞价数据导出', icon: <IconDescriptions /> },
+            { itemKey: 'bidExport', text: '竞价数据导出', icon: <IconDescriptions /> },
+            { itemKey: 'bidDetail', text: '竞价数据查看', icon: <IconTabs /> },
               {
                 text: '任务平台',
                 icon: <IconTree />,
@@ -60,10 +62,11 @@ function App() {
         />
       </Sider>
       <Layout>
-        <Content style={{ padding: '24px', background: '#f8f8f8' }}>
+        <Content style={{ padding: '20px', background: '#f8f8f8' }}>
           <Routes>
             <Route path="/home" element={<Home />} />
-            <Route path="/bidexport" element={<BidExport />} />
+            <Route path="/bidExport" element={<BidExport />} />
+            <Route path="/bidDetail" element={<BidDetail />} />
             {/* <Route path="/birthday" element={<Birthday />} /> */}
           </Routes>
         </Content>

@@ -37,8 +37,8 @@ function LoginForm({ onLoginSuccess }) {
       formData.append('username', username);
       formData.append('password', password);
 
-      //const response = await axios.post('http://localhost:5000/api/login', formData, {
-      const response = await axios.post('http://106.14.212.1:5000/api/login', formData, {
+      const response = await axios.post('http://localhost:5000/api/login', formData, {
+      //const response = await axios.post('http://106.14.212.1:5000/api/login', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
