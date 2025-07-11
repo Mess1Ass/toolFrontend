@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import Birthday from './pages/Birthday/Birthday'
 import BidExport from './pages/BidResultExport/BidExport'
 import BidDetail from './pages/BidDetail/BidDetail'
+import SeatMap from './pages/BidDetail/SeatMap/SeatMap'
 
 const { Header, Sider, Content } = Layout
 
@@ -67,6 +68,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/bidExport" element={<BidExport />} />
             <Route path="/bidDetail" element={<BidDetail />} />
+            <Route path="/seatMap" element={<SeatMap />} />
             {/* <Route path="/birthday" element={<Birthday />} /> */}
           </Routes>
         </Content>

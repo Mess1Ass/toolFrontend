@@ -1,0 +1,34 @@
+.seatmap-container { padding: 20px; }
+.stage { width: 100%; text-align: center; background: #ddd; font-size: 2em; margin-bottom: 20px; }
+.stand-area, .seat-area { display: flex; justify-content: center; margin-bottom: 20px; }
+.stand-left, .stand-right, .seat-left, .seat-right { margin: 0 20px; }
+.seat-row { display: flex; margin-bottom: 4px; }
+.seat { width: 28px; height: 28px; margin: 2px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; font-size: 0.9em; border: 1px solid #aaa; }
+.super-vip-seat { background: #cb009a; color: #fff; }
+.photo-vip-seat { background: #ff6504; color: #fff; }
+.vip-seat { background: #fec202; color: #000000; }
+.bar-seat {background: #01af4d; color: #fff; }
+.stand-seat { background: #93d051; color: #000000; }
+.normal-seat { background: #01b0f3; color: #000000; }
+.cat-seat { background: #67fffe; color: #000000; }
+.douyin-seat { background: #aca7e5; color: #000000; }
+
+.legend { margin-top: 20px; display: flex; justify-content: center; align-items: center; }
+.legend-item { display: inline-block; padding: 4px 12px; margin-right: 8px; border-radius: 4px; font-size: 0.95em; }
+.super-vip-seat.legend-item { background: #cb009a; }
+.photo-vip-seat.legend-item { background: #ff6504; }
+.vip-seat.legend-item { background: #fec202; }
+.bar-seat.legend-item { background: #01af4d; }
+.stand-seat.legend-item { background: #93d051; }
+.normal-seat.legend-item { background: #01b0f3; }
+.cat-seat.legend-item { background: #67fffe; }
+.douyin-seat.legend-item { background: #aca7e5; }
+.empty-seat {
+  background: transparent;
+  border: none;
+  cursor: default;
+  pointer-events: none;
+  box-shadow: none;
+  outline: none;
+  user-select: none;
+}

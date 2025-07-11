@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { Modal, Form, Input } from "@douyinfe/semi-ui"
 import axios from "axios"
+import config from "../../../config";
 
 export default function CreateFolderModal({ visible, onClose, onCreate, parent }) {
     const [name, setName] = useState("");
@@ -9,8 +10,7 @@ export default function CreateFolderModal({ visible, onClose, onCreate, parent }
     const handleOk = async () => {
         setError(""); // 清空旧错误
         try {
-            //const res = await axios.post("http://localhost:5000/create_folder", { name, parent });
-            const res = await axios.post("http://106.14.212.1:5000/create_folder", { name, parent });
+            const res = await axios.post(`${config.API_BASE_URL}/create_folder`, { name, parent });
             if (res.status === 200) {
                 onClose();
                 onCreate?.();
