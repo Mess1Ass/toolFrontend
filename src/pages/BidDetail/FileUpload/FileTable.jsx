@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { Table, Button, Upload, Progress, Modal, Toast } from "@douyinfe/semi-ui"
+import { Table, Button, Upload, Progress, Modal, Toast, Space } from "@douyinfe/semi-ui"
 import axios from "axios"
 import { IconBolt, IconFolder } from '@douyinfe/semi-icons';
 import config from "../../../config";
+import { useNavigate } from "react-router-dom";
+import './FileTable.css';
 
 export default function FileTable({ parent, files, onUpload, onRefresh, onDoubleClick, onViewExcel }) {
     const [uploadPercent, setUploadPercent] = useState(0);
     const uploadedRef = useRef(false);
+    const navigate = useNavigate();
 
     const handleDelete = (record) => {
         const isFolder = record.is_folder;
@@ -44,7 +47,6 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
     };
 
     const handleFolderUpload = async (fileList) => {
-        console.log("handleFolderUpload 触发，文件列表：", fileList);
         if (uploadedRef.current) return; // 已上传，防止重复
         uploadedRef.current = true;
 
@@ -73,7 +75,11 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
             Toast.success("上传成功");
             onUpload?.();
         } catch (err) {
-            Toast.error("上传失败");
+            let msg = '上传失败';
+            if (err.response && err.response.data && err.response.data.message) {
+                msg = err.response.data.message;
+            }
+            Toast.error(msg);
             console.error(err);
         } finally {
             setUploadPercent(0);
@@ -81,13 +87,31 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
         }
     };
 
+    const viewFolderExcel = async (folderId) => {
+        try {
+          // 先判断类型
+          const typeRes = await axios.get(`${config.API_BASE_URL}/file_type/${folderId}`);
+          if (typeRes.data.type === "folder") {
+            const res = await axios.get(`${config.API_BASE_URL}/folder/view_excels/${folderId}`);
+            navigate('/seatMap', { state: { seatData: res.data } });
+          } else if (typeRes.data.type === "excel") {
+            const res = await axios.get(`${config.API_BASE_URL}/view_excel/${folderId}`);
+            navigate('/seatMap', { state: { seatData: res.data } });
+          } else {
+            Toast.error("该类型不支持座位图预览");
+          }
+        } catch (error) {
+          Toast.error("获取数据失败");
+        }
+      };
+
     const columns = [
         {
             title: "文件名",
             dataIndex: "filename",
             render: (text, record) => (
-                <span style={{ 
-                    cursor: record.is_folder ? "pointer" : "default", 
+                <span style={{
+                    cursor: record.is_folder ? "pointer" : "default",
                     fontWeight: record.is_folder ? "bold" : "normal",
                     userSelect: 'none',
                     WebkitUserSelect: 'none',
@@ -111,17 +135,30 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
         {
             title: "操作",
             render: (_, record) => (
-                <>
+                <Space spacing={8}>
                     {!record.is_folder && record.filename.endsWith(".xlsx") && (
-                        <Button type="primary" onClick={(e) => { e.stopPropagation(); onViewExcel(record._id); }}>
+                        <Button
+                            type="primary"
+                            onClick={() => onViewExcel(record._id)}
+                        >
                             查看
                         </Button>
-
                     )}
-                    <Button type="danger" onClick={(e) => { e.stopPropagation(); handleDelete(record); }}>
+                    {record.is_folder && (
+                        <Button
+                            type="primary"
+                            onClick={() => viewFolderExcel(record._id)}
+                        >
+                            查看总体座位
+                        </Button>
+                    )}
+                    <Button
+                        type="danger"
+                        onClick={() => handleDelete(record)}
+                    >
                         删除
                     </Button>
-                </>
+                </Space>
             )
         }
     ];
@@ -146,10 +183,19 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                 columns={columns}
                 dataSource={files}
                 rowKey="_id"
+                bordered
                 onRow={(record) => ({
-                    onClick: () => {
+                    onClick: (e) => {
+                        // 检查点击的目标是否是按钮或其子元素
+                        const target = e.target;
+                        const isButton = target.closest('button') || target.tagName === 'BUTTON';
+
+                        if (isButton) {
+                            return; // 如果是按钮，不处理行点击
+                        }
+
                         if (record.is_folder) {
-                            onDoubleClick(record); // 可传 currentFolderId 给它
+                            onDoubleClick(record);
                         }
                     },
                     style: {
@@ -160,12 +206,17 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                         msUserSelect: 'none'
                     }
                 })}
+                style={{
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none'
+                }}
+                className="no-select-table"
             />
             <Upload
                 directory
                 multiple
-                // action={`${config.API_BASE_URL}/upload_folder?parent=${parent}`}
-                // customRequest={handleFolderUpload}
                 beforeUpload={() => false}
                 dragIcon={<IconBolt />}
                 draggable={true}
@@ -177,7 +228,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                     setTimeout(() => handleFolderUpload(fileList), 200);
                 }}
             ></Upload>
-            
+
         </div>
 
     )

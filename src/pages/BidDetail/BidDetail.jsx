@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react"
-import { Button, Breadcrumb, Space } from "@douyinfe/semi-ui"
+import { Button, Breadcrumb, Space, Toast } from "@douyinfe/semi-ui"
 import axios from "axios"
 
 import FileUploader from "./FileUpload/FileUploader";
@@ -31,8 +31,9 @@ export default function BidDetail() {
     const timeDiff = now - lastClickTimeRef.current;
     const isSameFolder = lastFolderIdRef.current === record._id;
     
-    // 防抖：如果点击的是同一个文件夹且时间间隔小于500ms，则忽略
-    if (isSameFolder && timeDiff < 500) {
+    // 防抖：如果点击的是同一个文件夹且时间间隔小于300ms，则忽略
+    // 减少防抖时间，避免影响按钮点击
+    if (isSameFolder && timeDiff < 300) {
       return;
     }
     
@@ -52,8 +53,20 @@ export default function BidDetail() {
   };
 
   const viewExcel = async (id) => {
-    const res = await axios.get(`${config.API_BASE_URL}/view_excel/${id}`);
-    setExcelData(res.data);
+    try {
+      // 先设置一个加载状态，确保 Modal 立即显示
+      setExcelData({ loading: true });
+      
+      const res = await axios.get(`${config.API_BASE_URL}/view_excel/${id}`);
+      setExcelData(res.data);
+    } catch (error) {
+      let msg = '获取Excel数据失败';
+      if (error.response && error.response.data && error.response.data.message) {
+        msg = error.response.data.message;
+      }
+      Toast.error(msg);
+      setExcelData(null);
+    }
   };
 
   useEffect(() => {

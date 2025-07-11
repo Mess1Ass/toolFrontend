@@ -1,0 +1,46 @@
+/* 禁用表格中所有元素的文本选择 */
+.no-select-table,
+.no-select-table *,
+.no-select-table th,
+.no-select-table td,
+.no-select-table .semi-table-thead,
+.no-select-table .semi-table-tbody,
+.no-select-table .semi-table-row,
+.no-select-table .semi-table-cell,
+.no-select-table .semi-table-header {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* 确保表格内容不可选择 */
+.no-select-table .semi-table-cell-content,
+.no-select-table .semi-table-cell-text {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* 表格头部不可选择 */
+.no-select-table .semi-table-thead th,
+.no-select-table .semi-table-thead .semi-table-cell {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+.no-select-table .semi-table-row {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #eee;
+  margin-bottom: 8px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  background: #fff;
+}
+.no-select-table .semi-table-row:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  border-color: #b3d4fc;
+} 

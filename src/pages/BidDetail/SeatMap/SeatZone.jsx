@@ -45,7 +45,7 @@ function getSeatType(row, col, seatNum) {
   return seatTypeMap.normal;
 }
 
-export default function SeatZone({ onSeatClick }) {
+export default function SeatZone({ onSeatClick, seatData }) {
   return (
     <div className="seat-area">
       <div className="seat-left">

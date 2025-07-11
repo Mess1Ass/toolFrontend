@@ -21,7 +21,7 @@ function getSeatType(rowIdx) {
   return "stand-seat";
 }
 
-export default function SeatStand({ onSeatClick }) {
+export default function SeatStand({ onSeatClick, seatData}) {
   const rowCount = standLeft.length;
   return (
     <div className="stand-area">
