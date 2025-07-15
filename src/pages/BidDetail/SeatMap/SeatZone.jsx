@@ -65,7 +65,7 @@ export default function SeatZone({ seatData }) {
 
   // 处理超级VIP座位数据
   useEffect(() => {
-    const normalData = seatData.find(d => d.type === "普座");
+    const normalData = seatData.find(d => d.type && d.type.includes("普座"));
     if (normalData && Array.isArray(normalData.rows)) {
       const map = {};
       normalData.rows.forEach(item => {
@@ -76,7 +76,7 @@ export default function SeatZone({ seatData }) {
       setNormalMap(map);
     }
 
-    const vipData = seatData.find(d => d.type === "VIP");
+    const vipData = seatData.find(d => d.type && d.type.includes("VIP") && !d.type.includes("SVIP"));
     if (vipData && Array.isArray(vipData.rows)) {
       const map = {};
       vipData.rows.forEach(item => {
@@ -87,7 +87,7 @@ export default function SeatZone({ seatData }) {
       setVipMap(map);
     }
 
-    const photoVipData = seatData.find(d => d.type === "摄影" || d.type === "SVIP");
+    const photoVipData = seatData.find(d => d.type && (d.type.includes("摄影") || d.type.includes("SVIP")));
     if (photoVipData && Array.isArray(photoVipData.rows)) {
       const map = {};
       photoVipData.rows.forEach(item => {

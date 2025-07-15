@@ -31,7 +31,7 @@ export default function SeatStand({ seatData }) {
 
   // 处理超级VIP座位数据
   useEffect(() => {
-    const barData = seatData.find(d => d.type === "杆位");
+    const barData = seatData.find(d => d.type && d.type.includes("杆位"));
     if (barData && Array.isArray(barData.rows)) {
       const map = {};
       barData.rows.forEach(item => {
@@ -42,7 +42,7 @@ export default function SeatStand({ seatData }) {
       setBarMap(map);
     }
 
-    const standData = seatData.find(d => d.type === "普站");
+    const standData = seatData.find(d => d.type && d.type.includes("普站"));
     if (standData && Array.isArray(standData.rows)) {
       const map = {};
       standData.rows.forEach(item => {

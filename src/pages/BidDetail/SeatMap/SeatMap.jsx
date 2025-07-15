@@ -312,10 +312,13 @@ export default function SeatMap() {
         <div className="legend">
           {legendTypes.map(item => {
             const matchedItems = seatData.filter(d => {
+              if (!d.type) return false;
               if (Array.isArray(item.type)) {
-                return item.type.includes(d.type);
+                // 如果是数组，检查数组中的任何类型是否包含在数据类型中
+                return item.type.some(t => d.type.includes(t));
               }
-              return d.type === item.type;
+              // 检查数据类型是否包含当前类型
+              return d.type.includes(item.type);
             });
 
             const hasData = matchedItems.length > 0;

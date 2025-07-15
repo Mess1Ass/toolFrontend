@@ -51,6 +51,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
         uploadedRef.current = true;
 
         const formData = new FormData();
+        let validFiles = 0;
 
         for (const item of fileList) {
             const file = item.fileInstance;
@@ -62,18 +63,40 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
             }
 
             formData.append("files", file, relPath);
+            validFiles++;
+        }
+
+        if (validFiles === 0) {
+            Toast.error('没有可上传的 Excel 文件');
+            uploadedRef.current = false;
+            return;
         }
 
         try {
+            setUploadPercent(1); // 开始上传
+            
             await axios.post(`${config.API_BASE_URL}/upload_folder?parent=${parent}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 onUploadProgress: (progressEvent) => {
-                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    // 将上传进度限制在 99%，等待服务器处理
+                    const percent = Math.min(
+                        Math.round((progressEvent.loaded * 99) / progressEvent.total),
+                        99
+                    );
                     setUploadPercent(percent);
                 }
             });
-            Toast.success("上传成功");
-            onUpload?.();
+
+            // 上传完成，设置为 100%
+            setUploadPercent(100);
+            
+            // 延迟一小段时间后再显示成功消息和清除进度条
+            setTimeout(() => {
+                Toast.success("上传成功");
+                setUploadPercent(0);
+                onUpload?.();
+            }, 500);
+
         } catch (err) {
             let msg = '上传失败';
             if (err.response && err.response.data && err.response.data.message) {
@@ -81,8 +104,8 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
             }
             Toast.error(msg);
             console.error(err);
-        } finally {
             setUploadPercent(0);
+        } finally {
             uploadedRef.current = false; // 恢复上传状态，允许下次再上传
         }
     };
@@ -175,9 +198,10 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
             {uploadPercent > 0 && (
                 <Progress
                     percent={uploadPercent}
-                    strokeWidth={6}
+                    strokeWidth={10}
                     showInfo
                     style={{ marginTop: 10 }}
+                    size="large"
                 />
             )}
             <Table
@@ -218,7 +242,9 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
             <Upload
                 directory
                 multiple
-                beforeUpload={() => false}
+                action={`${config.API_BASE_URL}/upload_folder`} // 添加 action 属性
+                beforeUpload={() => false} // 返回 false 以阻止默认上传
+                customRequest={({ fileList }) => {}} // 空的 customRequest 以阻止默认上传
                 dragIcon={<IconBolt />}
                 draggable={true}
                 accept=".xls,.xlsx"
