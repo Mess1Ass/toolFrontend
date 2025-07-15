@@ -87,21 +87,22 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
         }
     };
 
-    const viewFolderExcel = async (folderId) => {
+    const viewFolderExcel = async (folderId, filename) => {
         try {
           // 先判断类型
           const typeRes = await axios.get(`${config.API_BASE_URL}/file_type/${folderId}`);
           if (typeRes.data.type === "folder") {
             const res = await axios.get(`${config.API_BASE_URL}/folder/view_excels/${folderId}`);
-            navigate('/seatMap', { state: { seatData: res.data } });
+            navigate('/seatMap', { state: { seatData: res.data, filename: filename } });
           } else if (typeRes.data.type === "excel") {
             const res = await axios.get(`${config.API_BASE_URL}/view_excel/${folderId}`);
-            navigate('/seatMap', { state: { seatData: res.data } });
+            const dataList = [res.data]
+            navigate('/seatMap', { state: { seatData: dataList, filename: filename } });
           } else {
             Toast.error("该类型不支持座位图预览");
           }
         } catch (error) {
-          Toast.error("获取数据失败");
+          Toast.error("该文件夹无法预览");
         }
       };
 
@@ -139,7 +140,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                     {!record.is_folder && record.filename.endsWith(".xlsx") && (
                         <Button
                             type="primary"
-                            onClick={() => onViewExcel(record._id)}
+                            onClick={() => viewFolderExcel(record._id, record.filename)}
                         >
                             查看
                         </Button>
@@ -147,7 +148,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                     {record.is_folder && (
                         <Button
                             type="primary"
-                            onClick={() => viewFolderExcel(record._id)}
+                            onClick={() => viewFolderExcel(record._id, record.filename)}
                         >
                             查看总体座位
                         </Button>

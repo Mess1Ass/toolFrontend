@@ -14,6 +14,7 @@ export default function BidDetail() {
   const [folderStack, setFolderStack] = useState([{ id: "root", name: "全部文件" }]);
   const [showCreate, setShowCreate] = useState(false);
   const [excelData, setExcelData] = useState(null);
+  const [showExcelViewer, setShowExcelViewer] = useState(false);
   const lastClickTimeRef = useRef(0);
   const lastFolderIdRef = useRef(null);
 
@@ -56,6 +57,7 @@ export default function BidDetail() {
     try {
       // 先设置一个加载状态，确保 Modal 立即显示
       setExcelData({ loading: true });
+      setShowExcelViewer(true);
       
       const res = await axios.get(`${config.API_BASE_URL}/view_excel/${id}`);
       setExcelData(res.data);
@@ -66,6 +68,7 @@ export default function BidDetail() {
       }
       Toast.error(msg);
       setExcelData(null);
+      setShowExcelViewer(false);
     }
   };
 
@@ -122,9 +125,12 @@ export default function BidDetail() {
       />
 
       <ExcelViewer
-        visible={!!excelData}
+        visible={showExcelViewer}
         data={excelData}
-        onClose={() => setExcelData(null)}
+        onClose={() => {
+          setShowExcelViewer(false);
+          setExcelData(null);
+        }}
       />
     </div>
   )

@@ -1,9 +1,71 @@
-.seatmap-container { padding: 20px; }
-.stage { width: 100%; text-align: center; background: #ddd; font-size: 2em; margin-bottom: 20px; }
-.stand-area, .seat-area { display: flex; justify-content: center; margin-bottom: 20px; }
+/* 防止Modal打开时滚动条消失导致的布局偏移 */
+body {
+  overflow-y: scroll !important;
+  touch-action: manipulation;
+}
+
+.seatmap-container { 
+  padding: 20px; 
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.seatmap-content {
+  position: relative;
+  transform-origin: 0 0;
+  will-change: transform;
+  touch-action: none;
+}
+
+.stage { 
+  width: 100%; 
+  text-align: center; 
+  background: #ddd; 
+  font-size: 2em; 
+  margin-bottom: 20px;
+  touch-action: none;
+}
+
+.stand-area, .seat-area { 
+  display: flex; 
+  justify-content: center; 
+  margin-bottom: 20px;
+  touch-action: none;
+}
+
 .stand-left, .stand-right, .seat-left, .seat-right { margin: 0 20px; }
-.seat-row { display: flex; margin-bottom: 4px; }
-.seat { width: 28px; height: 28px; margin: 2px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; font-size: 0.9em; border: 1px solid #aaa; }
+
+.seat-row { 
+  display: flex; 
+  margin-bottom: 4px;
+  touch-action: none;
+}
+
+.seat { 
+  width: 28px; 
+  height: 28px; 
+  margin: 2px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 0.9em; 
+  border: 1px solid #aaa;
+  touch-action: none;
+  transition: transform 0.2s;
+}
+
+.seat:active {
+  transform: scale(0.95);
+}
+
+/* 座位类型样式 */
 .super-vip-seat { background: #cb009a; color: #fff; }
 .photo-vip-seat { background: #ff6504; color: #fff; }
 .vip-seat { background: #fec202; color: #000000; }
@@ -13,8 +75,64 @@
 .cat-seat { background: #67fffe; color: #000000; }
 .douyin-seat { background: #aca7e5; color: #000000; }
 
-.legend { margin-top: 20px; display: flex; justify-content: center; align-items: center; }
-.legend-item { display: inline-block; padding: 4px 12px; margin-right: 8px; border-radius: 4px; font-size: 0.95em; }
+/* 图例区域滚动容器 */
+.legend-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 0;
+  margin: 0 -20px;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.legend-scroll-container::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+.legend-scroll-container {
+  display: flex;
+  justify-content: center;
+}
+
+.legend { 
+  margin-top: 20px;
+  display: inline-flex; 
+  justify-content: center;
+  align-items: flex-start;
+  white-space: nowrap;
+  padding: 0 20px;
+  gap: 12px;
+}
+
+.legend > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: max-content;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.legend-item { 
+  display: inline-block; 
+  padding: 4px 8px; 
+  border-radius: 4px; 
+  font-size: 0.9em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
 .super-vip-seat.legend-item { background: #cb009a; }
 .photo-vip-seat.legend-item { background: #ff6504; }
 .vip-seat.legend-item { background: #fec202; }
@@ -31,4 +149,50 @@
   box-shadow: none;
   outline: none;
   user-select: none;
+}
+
+/* 缩放控制按钮 */
+.zoom-controls {
+  position: fixed;
+  bottom: 90px; /* 避免与底部图例重叠 */
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.zoom-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  touch-action: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.zoom-button:active {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .zoom-controls {
+    bottom: 100px;
+    right: 12px;
+  }
+  
+  .zoom-button {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
 }
