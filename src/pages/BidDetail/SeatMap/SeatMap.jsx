@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import ExcelViewer from "../ExcelViewer";
-import "./SeatMap.css";
+import "../css/SeatMap.css";
 import axios from "axios";
 import SeatStand from "./SeatStand";
 import SeatZone from "./SeatZone";

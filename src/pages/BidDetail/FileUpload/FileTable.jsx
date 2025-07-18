@@ -4,7 +4,7 @@ import axios from "axios"
 import { IconBolt, IconFolder } from '@douyinfe/semi-icons';
 import config from "../../../config";
 import { useNavigate } from "react-router-dom";
-import './FileTable.css';
+import '../css/FileTable.css';
 
 export default function FileTable({ parent, files, onUpload, onRefresh, onDoubleClick, onViewExcel }) {
     const [uploadPercent, setUploadPercent] = useState(0);

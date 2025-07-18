@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../../config';
 
 function LoginForm({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
-  const [showCodeInput, setShowCodeInput] = useState(false); // 是否显示验证码输入框
+  const [showCodeInput, setShowCodeInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const openMsg = (text) => {
     setMsg(text);
@@ -32,28 +34,36 @@ function LoginForm({ onLoginSuccess }) {
     setMsg('正在为你登录...');
 
     try {
-      // 这里的data要根据接口需要组织，我用FormData模拟serialize()效果
-      const formData = new URLSearchParams();
+      const formData = new FormData();
       formData.append('username', username);
       formData.append('password', password);
 
       const response = await axios.post(`${config.API_BASE_URL}/api/login`, formData, {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'multipart/form-data'
         }
       });
 
       const data = response.data;
       if (data.status === 200) {
+        // Store the entire data object in sessionStorage
+        sessionStorage.setItem('loginData', JSON.stringify(data.data));
+        console.log(data.data);
+        
         setMsg('登录成功，已获取cookies');
+        setLoginSuccess(true);
+        setLoading(false);
+        
+        // If onLoginSuccess callback exists, pass the data to parent
+        if (onLoginSuccess) {
+          onLoginSuccess(data.data);
+        }
       } else {
         setLoading(false);
         setMsg(data.desc || '登录失败');
-        // 根据状态决定是否显示验证码输入框
         if (data.status === '1011') {
           setShowCodeInput(true);
         }
-        // 其他状态可以根据你的逻辑继续处理
       }
     } catch (err) {
       setLoading(false);
@@ -70,7 +80,7 @@ function LoginForm({ onLoginSuccess }) {
             placeholder="账号"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            disabled={loading}
+            disabled={loading || loginSuccess}
             style={{ flex: '1 1 150px', padding: '6px' }}
         />
         <input
@@ -78,7 +88,7 @@ function LoginForm({ onLoginSuccess }) {
             placeholder="密码"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
+            disabled={loading || loginSuccess}
             style={{ flex: '1 1 150px', padding: '6px' }}
         />
         {showCodeInput && (
@@ -87,16 +97,16 @@ function LoginForm({ onLoginSuccess }) {
             placeholder="验证码"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            disabled={loading}
+            disabled={loading || loginSuccess}
             style={{ flex: '0 0 100px', padding: '6px' }}
             />
         )}
         <button
             onClick={doLogin}
-            disabled={loading}
+            // disabled={loading || loginSuccess}
             style={{ padding: '6px 16px', whiteSpace: 'nowrap' }}
         >
-            {loading ? '正在登录...' : '登录'}
+            {loading ? '正在登录...' : loginSuccess ? '登录成功' : '登录'}
         </button>
         </div>
       {msg && <div style={{ marginTop: 10, color: 'red' }}>{msg}</div>}
