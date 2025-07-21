@@ -42,12 +42,12 @@ function App() {
             { itemKey: 'home', text: '首页', icon: <IconHome /> },
             { itemKey: 'bidExport', text: '竞价数据导出', icon: <IconDescriptions /> },
             { itemKey: 'bidDetail', text: '竞价数据查看', icon: <IconTabs /> },
-              {
-                text: '任务平台',
-                icon: <IconTree />,
-                itemKey: 'job',
-                items: ['任务管理', '用户任务查询'],
-              },
+            // {
+            //   text: '任务平台',
+            //   icon: <IconTree />,
+            //   itemKey: 'job',
+            //   items: ['任务管理', '用户任务查询'],
+            // },
           ]}
           header={{
             logo: <IconSemiLogo style={{ height: '36px', fontSize: 36 }} />,

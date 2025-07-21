@@ -5,9 +5,12 @@ import { IconBolt, IconFolder } from '@douyinfe/semi-icons';
 import config from "../../../config";
 import { useNavigate } from "react-router-dom";
 import '../css/FileTable.css';
+import ExcelViewer from "../ExcelViewer";
 
 export default function FileTable({ parent, files, onUpload, onRefresh, onDoubleClick, onViewExcel }) {
     const [uploadPercent, setUploadPercent] = useState(0);
+    const [excelData, setExcelData] = useState(null);
+    const [showExcelViewer, setShowExcelViewer] = useState(false);
     const uploadedRef = useRef(false);
     const navigate = useNavigate();
 
@@ -74,7 +77,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
 
         try {
             setUploadPercent(1); // 开始上传
-            
+
             await axios.post(`${config.API_BASE_URL}/upload_folder?parent=${parent}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 onUploadProgress: (progressEvent) => {
@@ -89,7 +92,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
 
             // 上传完成，设置为 100%
             setUploadPercent(100);
-            
+
             // 延迟一小段时间后再显示成功消息和清除进度条
             setTimeout(() => {
                 Toast.success("上传成功");
@@ -112,21 +115,63 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
 
     const viewFolderExcel = async (folderId, filename) => {
         try {
-          // 先判断类型
-          const typeRes = await axios.get(`${config.API_BASE_URL}/file_type/${folderId}`);
-          if (typeRes.data.type === "folder") {
-            const res = await axios.get(`${config.API_BASE_URL}/folder/view_excels/${folderId}`);
-            navigate('/seatMap', { state: { seatData: res.data, filename: filename } });
-          } else if (typeRes.data.type === "excel") {
-            const res = await axios.get(`${config.API_BASE_URL}/view_excel/${folderId}`);
-            const dataList = [res.data]
-            navigate('/seatMap', { state: { seatData: dataList, filename: filename } });
-          } else {
-            Toast.error("该类型不支持座位图预览");
-          }
+            // 先判断类型
+            const typeRes = await axios.get(`${config.API_BASE_URL}/file_type/${folderId}`);
+            if (typeRes.data.type === "folder") {
+                const res = await axios.get(`${config.API_BASE_URL}/folder/view_excels/${folderId}`);
+                navigate('/seatMap', { state: { seatData: res.data, filename: filename } });
+            } else if (typeRes.data.type === "excel") {
+                const res = await axios.get(`${config.API_BASE_URL}/view_excel/${folderId}`);
+                const dataList = [res.data]
+                if (!filename.includes("月") && !filename.includes("日")) {
+                    handleViewExcel(res.data)
+                } else {
+                navigate('/seatMap', { state: { seatData: dataList, filename: filename } });
+                }
+            } else {
+                Toast.error("该类型不支持座位图预览");
+            }
         } catch (error) {
-          Toast.error("该文件夹无法预览");
+            Toast.error("该文件夹无法预览");
         }
+    };
+
+    const handleViewExcel = (data) => {
+        if (!data) {
+          setShowExcelViewer(false);
+          setExcelData(null);
+          return;
+        }
+    
+        // 确保我们有正确的数据结构
+        const rows = data.rows || [];
+        if (!Array.isArray(rows) || rows.length === 0) {
+          Toast.error('暂无数据');
+          setShowExcelViewer(false);
+          return;
+        }
+    
+        // 准备表格数据
+        const excelData = {
+          loading: false,
+          columns: ['座位号', '出价人', '出价时间', '出价金额', '出价状态', '座位类型'],
+          rows: rows.map(row => ({
+            '座位号': row.座位号 || '-',
+            '出价人': row.出价人 || '-',
+            '出价时间': row.出价时间 || '-',
+            '出价金额': row.出价金额 || '-',
+            '出价状态': row.出价状态 || '-',
+            '座位类型': row.座位类型 || '-'
+          }))
+        };
+    
+        // 如果有 datalist，添加到数据中（注意是小写的l）
+        if (data.datalist && Array.isArray(data.datalist) && data.datalist.length > 0) {
+          excelData.dataList = data.datalist; // 转换为 dataList 以匹配组件的预期
+        }
+    
+        setExcelData(excelData);
+        setShowExcelViewer(true);
       };
 
     const columns = [
@@ -250,7 +295,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                 multiple
                 action={`${config.API_BASE_URL}/upload_folder`} // 添加 action 属性
                 beforeUpload={() => false} // 返回 false 以阻止默认上传
-                customRequest={({ fileList }) => {}} // 空的 customRequest 以阻止默认上传
+                customRequest={({ fileList }) => { }} // 空的 customRequest 以阻止默认上传
                 dragIcon={<IconBolt />}
                 draggable={true}
                 accept=".xls,.xlsx"
@@ -261,6 +306,12 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                     setTimeout(() => handleFolderUpload(fileList), 200);
                 }}
             ></Upload>
+
+            <ExcelViewer
+                visible={showExcelViewer}
+                data={excelData}
+                onClose={() => handleViewExcel(null)}
+            />
 
         </div>
 

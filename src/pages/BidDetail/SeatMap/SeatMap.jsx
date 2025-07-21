@@ -37,22 +37,59 @@ export default function SeatMap() {
   const contentRef = useRef(null);
   const dragRef = useRef({ isDragging: false, startX: 0, startY: 0 });
   const pinchRef = useRef({ isPinching: false, startDist: 0, startScale: 1 });
+  // 优化拖动流畅度
+  const rafRef = useRef();
+  const nextTransformRef = useRef(transform);
+
+  // --- 新增 seatsWrapperRef 用于事件绑定 ---
+  const seatsWrapperRef = useRef(null);
 
   // 在组件挂载时添加事件监听器
   useEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
+    const seatsWrapper = seatsWrapperRef.current;
+    if (!seatsWrapper) return;
 
+    // --- 鼠标事件（PC端） ---
+    const handleMouseDown = (e) => {
+      if (e.button !== 0) return; // 只响应左键
+      dragRef.current = {
+        isDragging: true,
+        startX: e.clientX - transform.x,
+        startY: e.clientY - transform.y
+      };
+      window.addEventListener('mousemove', handleMouseMove, { passive: false });
+      window.addEventListener('mouseup', handleMouseUp, { passive: false });
+    };
+    const handleMouseMove = (e) => {
+      if (!dragRef.current.isDragging) return;
+      e.preventDefault();
+      const newX = e.clientX - dragRef.current.startX;
+      const newY = e.clientY - dragRef.current.startY;
+      nextTransformRef.current = { ...nextTransformRef.current, x: newX, y: newY };
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(() => {
+          setTransform(nextTransformRef.current);
+          rafRef.current = null;
+        });
+      }
+    };
+    const handleMouseUp = () => {
+      dragRef.current.isDragging = false;
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    seatsWrapper.addEventListener('mousedown', handleMouseDown, { passive: false });
+
+    // --- Touch事件（移动端） ---
     const handleTouchStart = (e) => {
       if (e.touches.length === 1) {
-        // 单指拖拽
         dragRef.current = {
           isDragging: true,
           startX: e.touches[0].clientX - transform.x,
           startY: e.touches[0].clientY - transform.y
         };
       } else if (e.touches.length === 2) {
-        // 双指缩放
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -67,24 +104,32 @@ export default function SeatMap() {
     };
 
     const handleTouchMove = (e) => {
-      // 阻止默认行为，防止页面滚动
       if (dragRef.current.isDragging || pinchRef.current.isPinching) {
         e.preventDefault();
       }
-
       if (dragRef.current.isDragging && e.touches.length === 1) {
-        // 单指拖拽
         const newX = e.touches[0].clientX - dragRef.current.startX;
         const newY = e.touches[0].clientY - dragRef.current.startY;
-        setTransform(prev => ({ ...prev, x: newX, y: newY }));
+        nextTransformRef.current = { ...nextTransformRef.current, x: newX, y: newY };
+        if (!rafRef.current) {
+          rafRef.current = requestAnimationFrame(() => {
+            setTransform(nextTransformRef.current);
+            rafRef.current = null;
+          });
+        }
       } else if (pinchRef.current.isPinching && e.touches.length === 2) {
-        // 双指缩放
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
         const scale = Math.min(Math.max(pinchRef.current.startScale * (dist / pinchRef.current.startDist), 0.5), 3);
-        setTransform(prev => ({ ...prev, scale }));
+        nextTransformRef.current = { ...nextTransformRef.current, scale };
+        if (!rafRef.current) {
+          rafRef.current = requestAnimationFrame(() => {
+            setTransform(nextTransformRef.current);
+            rafRef.current = null;
+          });
+        }
       }
     };
 
@@ -93,20 +138,26 @@ export default function SeatMap() {
       pinchRef.current.isPinching = false;
     };
 
-    // 添加事件监听器，设置为非被动模式
-    content.addEventListener('touchstart', handleTouchStart, { passive: true });
-    content.addEventListener('touchmove', handleTouchMove, { passive: false });
-    content.addEventListener('touchend', handleTouchEnd, { passive: true });
-    content.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+    seatsWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
+    seatsWrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
+    seatsWrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
+    seatsWrapper.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
-    // 清理函数
     return () => {
-      content.removeEventListener('touchstart', handleTouchStart);
-      content.removeEventListener('touchmove', handleTouchMove);
-      content.removeEventListener('touchend', handleTouchEnd);
-      content.removeEventListener('touchcancel', handleTouchEnd);
+      seatsWrapper.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      seatsWrapper.removeEventListener('touchstart', handleTouchStart);
+      seatsWrapper.removeEventListener('touchmove', handleTouchMove);
+      seatsWrapper.removeEventListener('touchend', handleTouchEnd);
+      seatsWrapper.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [transform.x, transform.y, transform.scale]);
+
+  // 保证transform和nextTransformRef同步
+  useEffect(() => {
+    nextTransformRef.current = transform;
+  }, [transform]);
 
   // 处理缩放按钮点击
   const handleZoom = (delta) => {
@@ -255,17 +306,10 @@ export default function SeatMap() {
       msUserSelect: 'none',
       paddingTop: '40px'
     }}>
-      <div
-        ref={contentRef}
-        className="seatmap-content"
-        style={{
-          transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-        }}
-      >
-        <Button
+      <Button
           style={{
             position: "absolute",
-            top: -30,
+            top: 0,
             right: 0,
             zIndex: 10
           }}
@@ -275,78 +319,107 @@ export default function SeatMap() {
         >
           返回
         </Button>
-        <div style={{
-          textAlign: 'center',
-          marginBottom: 8,
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: '#333',
-          position: 'relative'
-        }}>
-          {filename}
-        </div>
-        <div className="stage">舞台</div>
-        {/* 超级VIP中间3座位 */}
-        <div className="seat-row" style={{ justifyContent: 'center', marginBottom: 12 }}>
-          {["左", "中", "右"].map((pos, idx) => (
-            <div
-              key={pos}
-              className={`seat super-vip-seat${superVipMap[pos] ? " seat-has-user" : ""}`}
-              onClick={() => handleSuperVipClick(pos)}
-              style={{
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                transform: "scale(1)"
-              }}
-              title={superVipMap[pos] ? `出价人：${superVipMap[pos].出价人}` : "暂无数据"}
-            >
-              {`${pos}`}
-            </div>
-          ))}
-        </div>
-        <SeatStand seatData={seatData} />
-        <SeatZone seatData={seatData} />
-      </div>
-
-      <div className="legend-scroll-container">
-        <div className="legend">
-          {legendTypes.map(item => {
-            const matchedItems = seatData.filter(d => {
-              if (!d.type) return false;
-              if (Array.isArray(item.type)) {
-                // 如果是数组，检查数组中的任何类型是否包含在数据类型中
-                return item.type.some(t => d.type.includes(t));
-              }
-              // 检查数据类型是否包含当前类型
-              return d.type.includes(item.type);
-            });
-
-            const hasData = matchedItems.length > 0;
-            return (
-              <div key={item.key}>
-                <div className="legend-labels">
-                  <span
-                    className={`legend-item ${item.key}`}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {item.label}
-                  </span>
-                </div>
-                {hasData && (
-                  <Button
-                    size="small"
-                    style={{ width: 90 }}
-                    onClick={() => {
-                      const item = matchedItems[0];
-                      handleViewExcel(item);
-                    }}
-                  >
-                    查看具体信息
-                  </Button>
-                )}
+      <div
+        ref={contentRef}
+        className="seatmap-content"
+        style={{ position: 'relative', overflow: 'hidden', height: '90vh' }}
+      >
+        <div
+          ref={seatsWrapperRef}
+          className="seats-wrapper"
+          style={{
+            transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+            minWidth: 800,
+            minHeight: 600,
+            background: '#fff',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1
+          }}
+        >
+          <div style={{
+            textAlign: 'center',
+            marginBottom: 8,
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: '#333',
+            position: 'relative'
+          }}>
+            {filename}
+          </div>
+          <div className="stage">舞台</div>
+          {/* 超级VIP中间3座位 */}
+          <div className="seat-row" style={{ justifyContent: 'center', marginBottom: 12 }}>
+            {["左", "中", "右"].map((pos, idx) => (
+              <div
+                key={pos}
+                className={`seat super-vip-seat${superVipMap[pos] ? " seat-has-user" : ""}`}
+                onClick={() => handleSuperVipClick(pos)}
+                style={{
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  transform: "scale(1)"
+                }}
+                title={superVipMap[pos] ? `出价人：${superVipMap[pos].出价人}` : "暂无数据"}
+              >
+                {`${pos}`}
               </div>
-            );
-          })}
+            ))}
+          </div>
+          <SeatStand seatData={seatData} />
+          <SeatZone seatData={seatData} />
+        </div>
+        {/* 图例和其他内容 */}
+        <div className="legend-scroll-container" style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 2,
+          background: '#fff'
+        }}>
+          <div className="legend">
+            {legendTypes.map(item => {
+              const matchedItems = seatData.filter(d => {
+                if (!d.type) return false;
+                if (Array.isArray(item.type)) {
+                  // 如果是数组，检查数组中的任何类型是否包含在数据类型中
+                  return item.type.some(t => d.type.includes(t));
+                }
+                // 检查数据类型是否包含当前类型
+                return d.type.includes(item.type);
+              });
+
+              const hasData = matchedItems.length > 0;
+              return (
+                <div key={item.key}>
+                  <div className="legend-labels">
+                    <span
+                      className={`legend-item ${item.key}`}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                  {hasData && (
+                    <Button
+                      size="small"
+                      style={{ width: 90 }}
+                      onClick={() => {
+                        const item = matchedItems[0];
+                        handleViewExcel(item);
+                      }}
+                    >
+                      查看具体信息
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
