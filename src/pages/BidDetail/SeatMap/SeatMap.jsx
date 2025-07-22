@@ -8,7 +8,6 @@ import "../css/SeatMap.css";
 import axios from "axios";
 import SeatStand from "./SeatStand";
 import SeatZone from "./SeatZone";
-import config from "../../../config";
 
 export default function SeatMap() {
   const location = useLocation();
@@ -21,16 +20,11 @@ export default function SeatMap() {
   const filename = rawFilename.endsWith('.xlsx') || rawFilename.endsWith('.xls')
     ? rawFilename.replace(/\.(xlsx|xls)$/i, '')
     : rawFilename;
-  const [selected, setSelected] = useState(null);
-  const { itemId } = useParams(); // 实际上是 item_id
   const [superVipMap, setSuperVipMap] = useState({});
   const [modalInfo, setModalInfo] = useState(null);
   const [excelData, setExcelData] = useState(null);
   const [showExcelViewer, setShowExcelViewer] = useState(false);
-  const [type, setType] = useState(null);
-  const [activeLegends, setActiveLegends] = useState(null); // 当前激活的图例
   const navigate = useNavigate();
-  const calledRef = useRef(false);
 
   // 拖拽和缩放状态
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
@@ -48,38 +42,6 @@ export default function SeatMap() {
   useEffect(() => {
     const seatsWrapper = seatsWrapperRef.current;
     if (!seatsWrapper) return;
-
-    // --- 鼠标事件（PC端） ---
-    const handleMouseDown = (e) => {
-      if (e.button !== 0) return; // 只响应左键
-      dragRef.current = {
-        isDragging: true,
-        startX: e.clientX - transform.x,
-        startY: e.clientY - transform.y
-      };
-      window.addEventListener('mousemove', handleMouseMove, { passive: false });
-      window.addEventListener('mouseup', handleMouseUp, { passive: false });
-    };
-    const handleMouseMove = (e) => {
-      if (!dragRef.current.isDragging) return;
-      e.preventDefault();
-      const newX = e.clientX - dragRef.current.startX;
-      const newY = e.clientY - dragRef.current.startY;
-      nextTransformRef.current = { ...nextTransformRef.current, x: newX, y: newY };
-      if (!rafRef.current) {
-        rafRef.current = requestAnimationFrame(() => {
-          setTransform(nextTransformRef.current);
-          rafRef.current = null;
-        });
-      }
-    };
-    const handleMouseUp = () => {
-      dragRef.current.isDragging = false;
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    seatsWrapper.addEventListener('mousedown', handleMouseDown, { passive: false });
 
     // --- Touch事件（移动端） ---
     const handleTouchStart = (e) => {
@@ -144,9 +106,6 @@ export default function SeatMap() {
     seatsWrapper.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
     return () => {
-      seatsWrapper.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
       seatsWrapper.removeEventListener('touchstart', handleTouchStart);
       seatsWrapper.removeEventListener('touchmove', handleTouchMove);
       seatsWrapper.removeEventListener('touchend', handleTouchEnd);
@@ -307,22 +266,22 @@ export default function SeatMap() {
       paddingTop: '40px'
     }}>
       <Button
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            zIndex: 10
-          }}
-          onClick={() => navigate(-1)}
-          theme="solid"
-          type="secondary"
-        >
-          返回
-        </Button>
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          zIndex: 10
+        }}
+        onClick={() => navigate(-1)}
+        theme="solid"
+        type="secondary"
+      >
+        返回
+      </Button>
       <div
         ref={contentRef}
         className="seatmap-content"
-        style={{ position: 'relative', overflow: 'hidden', height: '90vh' }}
+        style={{ position: 'relative', overflow: 'auto', height: '90vh' }}
       >
         <div
           ref={seatsWrapperRef}
@@ -332,12 +291,8 @@ export default function SeatMap() {
             minWidth: 800,
             minHeight: 600,
             background: '#fff',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1
+            // position: 'absolute', // 移除
+            // left: 0, top: 0, right: 0, bottom: 0, zIndex: 1 // 移除
           }}
         >
           <div style={{
@@ -372,14 +327,16 @@ export default function SeatMap() {
           <SeatStand seatData={seatData} />
           <SeatZone seatData={seatData} />
         </div>
-        {/* 图例和其他内容 */}
-        <div className="legend-scroll-container" style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 2,
-          background: '#fff'
+      </div>
+      {/* 图例和其他内容 */}
+      <div className="legend-scroll-container" style={{
+          marginTop: 24,
+          position: 'static',
+          left: undefined,
+          right: undefined,
+          bottom: undefined,
+          zIndex: undefined,
+           background: 'transparent',
         }}>
           <div className="legend">
             {legendTypes.map(item => {
@@ -421,7 +378,6 @@ export default function SeatMap() {
             })}
           </div>
         </div>
-      </div>
 
       <div className="zoom-controls">
         <button className="zoom-button" onClick={() => handleZoom(0.1)}>+</button>

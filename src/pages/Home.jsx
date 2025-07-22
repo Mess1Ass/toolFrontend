@@ -1,13 +1,17 @@
-const Home = () => {
+import React from "react";
+import VoteMain from "./VoteView/VoteMain";
+
+function App() {
   return (
-    <div>
-      <h2>欢迎来到首页！</h2>
-      <iframe
-        src="https://xox48.top/v2024/#/vote"
-        style={{ width:"100%", height:"100vh", border:"none" }}
-      ></iframe>
+    <div style={{
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none'
+    }}>
+      <VoteMain />
     </div>
-  )
+  );
 }
 
-export default Home
+export default App;

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Table, Button, Upload, Progress, Modal, Toast, Space } from "@douyinfe/semi-ui"
 import axios from "axios"
 import { IconBolt, IconFolder } from '@douyinfe/semi-icons';
@@ -10,9 +10,14 @@ import ExcelViewer from "../ExcelViewer";
 export default function FileTable({ parent, files, onUpload, onRefresh, onDoubleClick, onViewExcel }) {
     const [uploadPercent, setUploadPercent] = useState(0);
     const [excelData, setExcelData] = useState(null);
+    const [total, setTotal] = useState(0);
     const [showExcelViewer, setShowExcelViewer] = useState(false);
     const uploadedRef = useRef(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setTotal(files.length);
+    }, [files]);
 
     const handleDelete = (record) => {
         const isFolder = record.is_folder;
@@ -114,24 +119,30 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
     };
 
     const viewFolderExcel = async (folderId, filename) => {
+        const toastId = Toast.info({ content: '加载中...', duration: 0, position: 'center' });
         try {
             // 先判断类型
             const typeRes = await axios.get(`${config.API_BASE_URL}/file_type/${folderId}`);
             if (typeRes.data.type === "folder") {
                 const res = await axios.get(`${config.API_BASE_URL}/folder/view_excels/${folderId}`);
+                Toast.close(toastId);
                 navigate('/seatMap', { state: { seatData: res.data, filename: filename } });
             } else if (typeRes.data.type === "excel") {
                 const res = await axios.get(`${config.API_BASE_URL}/view_excel/${folderId}`);
                 const dataList = [res.data]
                 if (!filename.includes("月") && !filename.includes("日")) {
+                    Toast.close(toastId);
                     handleViewExcel(res.data)
                 } else {
-                navigate('/seatMap', { state: { seatData: dataList, filename: filename } });
+                    Toast.close(toastId);
+                    navigate('/seatMap', { state: { seatData: dataList, filename: filename } });
                 }
             } else {
+                Toast.close(toastId);
                 Toast.error("该类型不支持座位图预览");
             }
         } catch (error) {
+            Toast.close();
             Toast.error("该文件夹无法预览");
         }
     };

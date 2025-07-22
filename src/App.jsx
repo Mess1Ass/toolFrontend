@@ -50,7 +50,7 @@ function App() {
             // },
           ]}
           header={{
-            logo: <IconSemiLogo style={{ height: '36px', fontSize: 36 }} />,
+            logo: <img src="/snh_logo.jpg" alt="SNH48 Logo" style={{ height: 42, width: 40, borderRadius: 2, objectFit: 'contain' }} />,
             text: 'SNH48 相关工具箱'
           }}
           footer={{
