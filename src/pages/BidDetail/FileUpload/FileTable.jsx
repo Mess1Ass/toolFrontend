@@ -232,12 +232,12 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                             查看总体座位
                         </Button>
                     )}
-                    <Button
+                    {/* <Button
                         type="danger"
                         onClick={() => handleDelete(record)}
                     >
                         删除
-                    </Button>
+                    </Button> */}
                 </Space>
             )
         }
@@ -301,7 +301,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                 }}
                 className="no-select-table"
             />
-            <Upload
+            {/* <Upload
                 directory
                 multiple
                 action={`${config.API_BASE_URL}/upload_folder`} // 添加 action 属性
@@ -316,7 +316,7 @@ export default function FileTable({ parent, files, onUpload, onRefresh, onDouble
                 onChange={({ fileList, currentFile }) => {
                     setTimeout(() => handleFolderUpload(fileList), 200);
                 }}
-            ></Upload>
+            ></Upload> */}
 
             <ExcelViewer
                 visible={showExcelViewer}

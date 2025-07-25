@@ -99,14 +99,14 @@ export default function BidDetail() {
         ))}
       </Breadcrumb>
 
-      <div style={{ marginBottom: 16 }}>
+      {/* <div style={{ marginBottom: 16 }}>
         <Space>
           <FileUploader parent={currentFolder.id} onUpload={fetchFiles} />
           <Button onClick={() => setShowCreate(true)} type="secondary" theme="solid">
             新建文件夹
           </Button>
         </Space>
-      </div>
+      </div> */}
 
       <FileTable
         parent={currentFolder.id}
