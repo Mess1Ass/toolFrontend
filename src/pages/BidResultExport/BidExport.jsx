@@ -41,7 +41,7 @@ export default function BidExport() {
     setLoading(true);
     setError('');
     try {
-      const cookieString = loginData.map(cookie => `${cookie.name}=${cookie.value}`)
+      const cookieString = loginData.cookies.map(cookie => `${cookie.name}=${cookie.value}`)
         .join('; ');
       const response = await axios.post(`${config.API_BASE_URL}/api/shop`, {
         totalCount: loginData.totalCount,
