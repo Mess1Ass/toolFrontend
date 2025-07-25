@@ -1,6 +1,6 @@
 // src/config.js
 
-// const ENV = "dev"; // 切换成 "prod" 使用服务器地址
+//const ENV = "dev"; // 切换成 "prod" 使用服务器地址
 const ENV = "prod"; 
 
 const config = {

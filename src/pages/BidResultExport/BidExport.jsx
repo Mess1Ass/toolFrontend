@@ -30,17 +30,18 @@ export default function BidExport() {
 
   // fetchShopData 支持传入 loginData 以便首次加载时复用
   const fetchShopData = async (page = 1, loginDataParam, cb) => {
+    
     const loginData = loginDataParam || JSON.parse(sessionStorage.getItem('loginData'));
     if (!loginData) {
       setError('请先登录');
       cb && cb();
       return;
     }
+    
     setLoading(true);
     setError('');
     try {
-      const cookieString = loginData.cookies
-        .map(cookie => `${cookie.name}=${cookie.value}`)
+      const cookieString = loginData.map(cookie => `${cookie.name}=${cookie.value}`)
         .join('; ');
       const response = await axios.post(`${config.API_BASE_URL}/api/shop`, {
         totalCount: loginData.totalCount,
@@ -209,7 +210,7 @@ export default function BidExport() {
         <LoginForm onLoginSuccess={handleLoginSuccess} />
       ) : (
         <div style={{ marginTop: 20, position: 'relative', minHeight:40, paddingBottom: 64 }}>
-          {/* <div style={{ marginBottom: 20, display: 'flex', gap: 10 }}>
+          <div style={{ marginBottom: 20, display: 'flex', gap: 10 }}>
             <Button
               onClick={() => fetchShopData(1)}
               loading={loading}
@@ -217,7 +218,7 @@ export default function BidExport() {
             >
               获取商品数据
             </Button>
-          </div> */}
+          </div>
           <ShopDetail
             shopData={shopData}
             totalCount={loginData?.totalCount}

@@ -6,6 +6,10 @@ import config from '../../config';
 export default function ShopDetail({ shopData, totalCount, onExportData }) {
   const [selectedItems, setSelectedItems] = useState(new Set());
 
+  useEffect(() => {
+    console.log(shopData);
+  }, [shopData]);
+
   // 选择/取消选择商品
   const handleSelectItem = (itemId) => {
     setSelectedItems(prev => {
