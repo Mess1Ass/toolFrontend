@@ -8,7 +8,7 @@ const config = {
     API_BASE_URL: "http://localhost:5000"
   },
   prod: {
-    API_BASE_URL: "https://106.14.212.1:5000"
+    API_BASE_URL: "https://48api.tool4me.cn"
   }
 };
 
